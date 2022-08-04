@@ -24,7 +24,8 @@ import {
   TableColumn,
   Switch,
   Tooltip,
-  Pagination
+  Pagination,
+  Dialog
  } from "element-ui";
 Vue.use(Button)
 Vue.use(Form)
@@ -50,6 +51,7 @@ Vue.use(TableColumn)
 Vue.use(Switch)
 Vue.use(Tooltip)
 Vue.use(Pagination)
+Vue.use(Dialog)
 
 // 把 message挂载到Vue上面
 Vue.prototype.$message = Message

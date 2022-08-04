@@ -25,7 +25,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">
+          <el-button type="primary" @click="addDialogVisible = true">
             添加用户
           </el-button>
         </el-col>
@@ -65,7 +65,7 @@
         <el-table-column
           label="状态">
           <!-- 通过作用域插槽获取每一行数据 （数据存放在scope.row上面） -->
-          <template scope="scope">
+          <template slot-scope="scope">
             <!-- 开关按钮，用v-model绑定每一行的数据的mg_state的值（布尔值） -->
             <el-switch
               @change="userStateChanged(scope.row)"
@@ -106,6 +106,43 @@
         :total="total">
       </el-pagination>
     </el-card>
+    <!-- // 添加用户对话框 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="addDialogVisible"
+      width="40%">
+      <!-- 主体内容区域 -->
+      <span>
+        <el-form 
+        :model="addForm" 
+        :rules="addFormRules" 
+        ref="addFormRef" 
+        label-width="70px"
+        >
+        <!-- 用户名 -->
+          <el-form-item label="用户名" prop="username">
+            <el-input v-model="addForm.username"></el-input>
+          </el-form-item>
+          <!-- 密码 -->
+          <el-form-item label="密码" prop="password">
+            <el-input v-model="addForm.password" type="password"></el-input>
+          </el-form-item>
+          <!-- 邮箱 -->
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="addForm.email"></el-input>
+          </el-form-item>
+          <!-- 手机号 -->
+          <el-form-item label="手机号" prop="mobile">
+            <el-input v-model="addForm.mobile"></el-input>
+          </el-form-item>
+        </el-form>
+      </span>
+      <!-- 底部按钮区域 -->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -121,7 +158,37 @@
           pagesize:2
         },
         userList:[],
-        total:0
+        // 数据数量
+        total:0,
+        // 控制添加用户信息对话框的显示与隐藏,默认值为false
+        addDialogVisible: false,
+        // 添加用户表单数据对象
+        addForm:{
+          username:'',
+          password:'',
+          email:'',
+          mobile:''
+
+        },
+        // 添加表单的验证规则对象
+        addFormRules:{
+          username:[
+            {required:true,message:'请输入用户名',trigger:'blur'},
+            {min:3,max:10,message:'用户名长度在3-10个字符之间',trigger:'blur'}
+          ],
+          password:[
+            {required:true,message:'请输入密码',trigger:'blur'},
+            {min:6,max:15,message:'密码长度在6-15个字符之间',trigger:'blur'}
+          ],
+          email:[
+            {required:true,message:'请输入邮箱',trigger:'blur'},
+            // {min:6,max:15,message:'密码长度在6-15个字符之间',trigger:'blur'}
+          ],
+          mobile:[
+            {required:true,message:'请输入手机号',trigger:'blur'},
+            // {min:6,max:15,message:'密码长度在6-15个字符之间',trigger:'blur'}
+          ]
+        }
       }
     },
     created(){

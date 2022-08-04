@@ -14,23 +14,23 @@ const router = new Router({
     },
     {
       path:'/login',
-      name:LoginPage,
+      // name:LoginPage,
       component:LoginPage
     },
     {
       path:'/home',
-      name:HomePage,
+      // name:HomePage,
       component:HomePage,
       redirect:'/welcome',
       children:[
         {
           path:'/welcome',
-          name:WelcomePage,
+          // name:WelcomePage,
           component:WelcomePage
         },
         {
           path:'/users',
-          name:UserPage,
+          // name:UserPage,
           component:UserPage
         }
       ]
