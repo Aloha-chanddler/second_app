@@ -23,6 +23,7 @@
             :collapse="isCollaps"
             :collapse-transition="false"
             :router="true"
+            :default-active="activePath"
             >
             <!-- 一级菜单 -->
             <!-- 每个菜单应该有一个唯一的index值，否则菜单项展开的时候所有的菜单都会跟着展开 -->
@@ -36,7 +37,12 @@
               </template>
               <!-- 二级菜单 -->
               <!-- 菜单的路由链接默认为index所对应的值，应改造为其对应的path属性的值 -->
-              <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id">
+              <!-- 当点击二级菜单时，把点击对应的路径通过savaNavState函数保存到浏览器本地存储localstorage中 以达到二级菜单高亮保持的效果 -->
+              <el-menu-item :index="'/' + subItem.path" 
+              v-for="subItem in item.children" 
+              :key="subItem.id"
+              @click="savaNavState('/' + subItem.path)"
+              >
                 <!-- 二级菜单图标 -->
                 <i class="fa fa-th-list"></i>
                 <!-- 二级菜单文本 -->
@@ -61,6 +67,7 @@
       return{
         //左侧菜单数据
         menulist:[],
+        // 侧边栏一级菜单图标显示
         iconObj:{
           '125':'fa fa-user-plus',
           '103':'fa fa-balance-scale',
@@ -68,13 +75,18 @@
           '102':'fa fa-pencil-square-o',
           '145':'fa fa-bar-chart'
         },
-        isCollaps:false
+        // 是否折叠的状态，默认为false
+        isCollaps:false,
+        // 在data中保存被激活的链接地址，默认为空字符串
+        activePath:''
       }
     },
     created(){
       this.getMenuList()
+      this.activePath = window.sessionStorage.getItem('activePath')
     },
     methods:{
+      // 退出按钮
       logout(){
         window.sessionStorage.clear()
         this.$router.push('/login')
@@ -84,11 +96,17 @@
         const {data} = await this.$http.get('menus')
         if(data.meta.status !== 200) return this.$message.error(data.meta.msg)
         this.menulist = data.data
-        console.log(this.menulist);
+        // console.log(this.menulist);
       },
       // 点击按钮，切换菜单的折叠与展开
       toggleCollaps(){
         this.isCollaps = !this.isCollaps
+      },
+      // 保存链接的激活状态
+      savaNavState(activePath){
+        window.sessionStorage.setItem('activePath',activePath)
+        // 每次点击二级菜单时为activePath重新赋值
+        this.activePath = activePath
       }
     }
   }
