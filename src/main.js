@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import axios from 'axios'
-import router from '@/routers/index'
+import router from '@/router/index'
 import './plugins/element'
 import 'font-awesome/css/font-awesome.css'
 // 配置请求的根路径
