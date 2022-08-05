@@ -373,7 +373,7 @@ export default {
         // 重新获取服务器数据
         this.getUserList()
         // 关闭对话框
-        this.editDialogVisible = false
+        // this.editDialogVisible = false
         // 提示成功信息
         this.$message.success(data.meta.msg)
       })
