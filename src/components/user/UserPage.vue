@@ -377,7 +377,7 @@ export default {
         // 提示成功信息
         this.$message.success(data.meta.msg)
       })
-    }
+    },
   },
 };
 </script>
