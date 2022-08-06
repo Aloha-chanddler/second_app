@@ -4,6 +4,8 @@ import LoginPage from '@/components/LoginPage'
 import HomePage from '@/components/HomePage'
 import WelcomePage from '@/components/WelcomePage'
 import UserPage from '@/components/user/UserPage'
+import rightsPage from '@/components/power/rightsPage'
+import rolesPage from '@/components/power/rolesPage'
 Vue.use(Router)
 
 const router = new Router({
@@ -32,7 +34,17 @@ const router = new Router({
           path:'/users',
           // name:UserPage,
           component:UserPage
-        }
+        },
+        {
+          path:'/rights',
+          // name:UserPage,
+          component:rightsPage
+        },
+        {
+          path:'/roles',
+          // name:UserPage,
+          component:rolesPage
+        },
       ]
     }
   ]
