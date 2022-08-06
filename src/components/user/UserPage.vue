@@ -69,7 +69,12 @@
               @click="showEditDialog(scope.row.id)"
             ></el-button>
             <!-- 删除按钮 -->
-            <el-button type="danger" size="mini" icon="fa fa-trash"></el-button>
+            <el-button 
+            type="danger" 
+            size="mini" 
+            icon="fa fa-trash"
+            @click="removeUser(scope.row.id)"
+            ></el-button>
             <!-- 分配角色按钮 -->
             <el-tooltip
               effect="dark"
@@ -378,6 +383,23 @@ export default {
         this.$message.success(data.meta.msg)
       })
     },
+    // 根据id删除对应的用户信息
+    async removeUser(id){
+      // 弹框询问用户是否删除
+      const confirmResult = await this.$confirm('是否永久删除该用户？','提示',{
+        confirmButtonText:'确定',
+        cancelButtonText:'取消',
+        type:'warning'
+      }).catch(err=>err)
+      // 如果用户点击确认按钮，则返回字符串'confirm'，如果点击取消，则返回'cancel'
+      console.log(confirmResult);
+      // 判断用户点击的是确认按钮或者取消按钮，从而确定是否发起服务器请求
+      if(confirmResult !== 'confirm') return this.$message.info('取消删除！')
+      // 如果用户点击了确定，则进行服务器请求
+      const {data} = await this.$http.delete('users/' + id)
+      if(data.meta.status!==200) return this.$message.err(data.meta.msg)
+      this.getUserList()
+    }
   },
 };
 </script>

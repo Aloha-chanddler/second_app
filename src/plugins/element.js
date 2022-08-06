@@ -25,7 +25,8 @@ import {
   Switch,
   Tooltip,
   Pagination,
-  Dialog
+  Dialog,
+  MessageBox
  } from "element-ui";
 Vue.use(Button)
 Vue.use(Form)
@@ -55,3 +56,4 @@ Vue.use(Dialog)
 
 // 把 message挂载到Vue上面
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm
