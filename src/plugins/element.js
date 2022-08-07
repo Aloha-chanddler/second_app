@@ -29,6 +29,7 @@ import {
   MessageBox,
   Tag
  } from "element-ui";
+
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
@@ -59,3 +60,6 @@ Vue.use(Tag)
 // 把 message挂载到Vue上面
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
+
+// 弹出框的时候滚动条隐藏和出现导致页面抖动问题
+// ElementUI.Dialog.props.lockScroll.default = false;

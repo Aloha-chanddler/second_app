@@ -19,7 +19,39 @@
         <!-- 角色列表主体区域 -->
         <el-table :data="roleList" border stripe>
           <!-- 展开列 -->
-          <el-table-column type="expand"></el-table-column>
+          <el-table-column type="expand">
+            <!-- 作用域插槽 -->
+            <template slot-scope="scope">
+              <!-- 布置栅格系统 -->
+              <el-row :class="[i1 === 0 ? 'bdtop':'','bdbottom']" v-for="(item1,i1) in scope.row.children" :key="item1.id">
+                <!-- 一级权限 -->
+                <el-col :span="5">
+                  <el-tag closable @close="removeRightsById(scope.row,item1.id)">
+                    {{item1.authName}}
+                  </el-tag>
+                  <i class="fa fa-caret-right"></i>
+                </el-col>
+                <!-- 二级和三级权限 -->
+                <el-col :span="19">
+                  <el-row :class="[i2 === 0 ? '':'bdtop']" v-for="(item2,i2) in item1.children" :key="item2.id">
+                    <!-- 二级 -->
+                    <el-col :span="6">
+                      <el-tag type="success" closable @close="removeRightsById(scope.row,item2.id)">
+                        {{item2.authName}}
+                      </el-tag>
+                      <i class="fa fa-caret-right"></i>
+                    </el-col>
+                    <!-- 三级 -->
+                    <el-col :span="18">
+                      <el-tag  @close="removeRightsById(scope.row,item3.id)" v-for="item3 in item2.children" :key="item3.id" type="warning" closable>
+                        {{item3.authName}}
+                      </el-tag>
+                    </el-col>
+                  </el-row>
+                </el-col>
+              </el-row>
+            </template>
+          </el-table-column>
           <!-- 索引列 -->
           <el-table-column type="index"></el-table-column>
           <el-table-column label="角色名称" prop="roleName"></el-table-column>
@@ -69,6 +101,7 @@
           title="添加角色"
           :visible.sync="editRoleDialogVisible"
           width="50%"
+          :lock-scroll='false'
           >
           <!-- 添加角色表单区域 -->
           <span>
@@ -227,11 +260,37 @@
         if(data.meta.status !==200) return this.$message.error('删除角色失败！')
         this.$message.success(data.meta.msg)
         this.getRoleList()
+      },
+      // 移除权限项
+      async removeRightsById(role,rightId){
+        const confirmResult = await this.$confirm('是否要删除该权限？','删除权限',{
+          confirmButtonText:'确定',
+          cancelButtonText:'取消',
+          type:'warning'
+        }).catch(err => err)
+        // console.log(confirmResult);
+        if(confirmResult !== 'confirm') return this.$message.info('取消删除权限')
+        const {data} = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+        if(data.meta.status!==200) return this.$message('删除权限失败！')
+        // 因为此请求的返回值本身就是当前角色下最新的权限数据，所以如果重新调用请求角色列表的函数
+        // 会导致表格关闭，所以如果直接把服务器返回的数据给到role.children，那么就不用再重新请求一次了，既避免
+        // 了不必要的服务器请求，而且页面的表格也不会关闭
+        // this.getRoleList()
+        role.children = data.data
       }
     }
   }
 </script>
 
-<style>
+<style lang="less" scoped>
+  .el-tag{
+    margin: 7px;
+  }
 
+  .bdtop{
+    border-top: 1px solid #eee;
+  }
+  .bdbottom{
+    border-bottom: 1px solid #eee;
+  }
 </style>
