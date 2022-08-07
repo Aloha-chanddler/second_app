@@ -58,9 +58,17 @@
           <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
+              <!-- 编辑按钮 -->
               <el-button size="mini" type="primary" icon="fa fa-edit" @click="showEditRoleDialog(scope.row.id)">&nbsp;编辑</el-button>
+              <!-- 删除按钮 -->
               <el-button size="mini" type="danger" icon="fa fa-trash" @click="deleteRole(scope.row.id)">&nbsp;删除</el-button>
-              <el-button size="mini" type="warning" icon="fa fa-cube">&nbsp;分配权限</el-button>
+              <!-- 分配权限按钮 -->
+              <el-button 
+              size="mini" 
+              type="warning" 
+              icon="fa fa-cube" 
+              @click="showSetRightsDialog(scope.row)"
+              >&nbsp;分配权限</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -126,6 +134,31 @@
             <el-button type="primary" @click="editRole()">确 定</el-button>
           </span>
         </el-dialog>
+
+        <!-- 分配权限对话框 -->
+        <el-dialog
+          title="分配权限"
+          :visible.sync="setRightsDialogVisible"
+          width="50%"
+          @close="setRightDialoClosed"
+          >
+            <!-- 树形控件 -->
+            <el-tree
+              :data="rightsList"
+              :props="treeProps"
+              show-checkbox
+              node-key="id"
+              :default-expand-all="true"
+              :default-checked-keys="defKeys"
+              ref="treeRef"
+              >
+            </el-tree>
+          <!-- 底部按钮 -->
+          <span slot="footer">
+            <el-button @click="setRightsDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="allotRights">确 定</el-button>
+          </span>
+        </el-dialog>
       </el-card>
   </div>
 </template>
@@ -186,7 +219,20 @@
               trigger: "blur",
             },
           ]
-        }
+        },
+        // 分配权限对话框的显示与隐藏
+        setRightsDialogVisible:false,
+        // 用于保存权限列表的数组
+        rightsList:[],
+        // 树形控件的属性绑定对象
+        treeProps:{
+          label:'authName',
+          children:'children'
+        },
+        // 三级权限的id数组
+        defKeys:[],
+        // 用于保存当前即将分配权限的角色id
+        roleId:''
       }
     },
     created(){
@@ -277,6 +323,62 @@
         // 了不必要的服务器请求，而且页面的表格也不会关闭
         // this.getRoleList()
         role.children = data.data
+      },
+      // 展示分配权限的对话框
+      async showSetRightsDialog(role){
+        // 把当前角色的id保存到
+        this.roleId = role.id
+        // 获取所有权限的数据
+        const {data} = await this.$http.get('rights/tree')
+        // console.log(data);
+        if(data.meta.status !==200){
+          return this.$message.error('获取权限列表失败！')
+        }
+        // 把获取到的权限数据保存到data中
+        this.rightsList = data.data
+        console.log(this.rightsList);
+        // 递归获取三级节点的id
+        this.getLeafKeys(role,this.defKeys)
+        this.setRightsDialogVisible = true
+      },
+      // 通过递归函数，获取角色下所有三级权限的id，并保存到defKeys数组中
+      getLeafKeys(node,arr){
+        // 如果当前node节点包含了有children属性(node.children为true），则证明此节点不是三级节点
+        if(!node.children){
+          return arr.push(node.id)
+        }
+        // 如果逻辑还未反出结果，则需继续调用此函数，直到找到三级节点为止
+        node.children.forEach(item => {
+          this.getLeafKeys(item,arr)
+        })
+      },
+      // 监听分配权限对话框的关闭事件
+      setRightDialoClosed(){
+        // 把data中的defKeys数组重置为空数组，以免造成bug
+        this.defKeys = []
+      },
+      // 点击为角色分配权限
+      async allotRights(){
+        const keys = [
+          // getCheckedKeys是element-ui中的树形控件里的方法
+          // 可以返回目前被选中的节点的key所组成的数组
+          // 再通过ES6的展开运算符放到此数组中
+          ...this.$refs.treeRef.getCheckedKeys(),
+          // getHalfCheckedKeys返回半选中节点的key所组成的数组
+          ...this.$refs.treeRef.getHalfCheckedKeys()
+        ]
+        // console.log(keys);
+        // API要求形成以‘，’分割的权限id列表
+        const idStr = keys.join(',')
+        // 向服务器发起角色授权的请求
+        const {data} = await this.$http.post(`roles/${this.roleId}/rights`,{rids:idStr})
+        if(data.meta.status !==200) return this.$message.error('分配角色权限失败！')
+        // 提示用户分配权限成功
+        this.$message.success('分配权限成功！')
+        // 重新获取角色列表数据
+        this.getRoleList()
+        // 关闭对话框
+        this.setRightsDialogVisible =false
       }
     }
   }
