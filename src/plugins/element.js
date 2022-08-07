@@ -28,7 +28,7 @@ import {
   Dialog,
   MessageBox,
   Tag,
-  Tree
+  Tree,
  } from "element-ui";
 
 Vue.use(Button)
