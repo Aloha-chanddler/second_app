@@ -29,6 +29,7 @@ import {
   MessageBox,
   Tag,
   Tree,
+  Cascader
  } from "element-ui";
 
 Vue.use(Button)
@@ -58,6 +59,7 @@ Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Tag)
 Vue.use(Tree)
+Vue.use(Cascader)
 
 // 把 message挂载到Vue上面
 Vue.prototype.$message = Message

@@ -3,7 +3,12 @@ html,body,#app{
   height: 100%;
   margin: 0;
   padding: 0;
-  min-width: 1400px;
+  min-width: 1366px;
+}
+
+.el-cascader-menu{
+  height: 300px;
+  width: 100%;
 }
 
 .el-breadcrumb{

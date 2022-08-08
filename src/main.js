@@ -4,6 +4,7 @@ import axios from 'axios'
 import router from '@/router/index'
 import './plugins/element'
 import 'font-awesome/css/font-awesome.css'
+import TreeTable from 'vue-table-with-tree-grid'
 // 配置请求的根路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
 // 设置请求拦截器，添加token令牌，保证拥有获取数据的权限
@@ -17,6 +18,9 @@ axios.interceptors.request.use(config=>{
 Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
+
+// 全局注册 vue-table-with-tree-grid
+Vue.component('tree-table',TreeTable)
 
 new Vue({
   render: h => h(App),

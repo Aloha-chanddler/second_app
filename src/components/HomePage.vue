@@ -11,7 +11,7 @@
       <el-container>
         <!-- 侧边栏 -->
         <!-- 动态绑定侧边栏折叠与打开的宽度 -->
-        <el-aside :width="isCollaps? '64px' : '180px'">
+        <el-aside :width="isCollaps? '64px' : '200px'">
           <!-- 菜单栏折叠 -->
           <div class="toggle-button" @click="toggleCollaps">|||</div>
           <!-- 侧边栏菜单区域 -->
