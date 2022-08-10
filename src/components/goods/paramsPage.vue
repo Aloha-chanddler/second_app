@@ -39,7 +39,32 @@
           <!-- 动态参数表格 -->
           <el-table :data="manyTableData" border stripe>
             <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- 循环渲染tag标签 -->
+                <el-tag 
+                class="attr-tags"
+                v-for="(item,index) in scope.row.attr_vals" 
+                :key="index"
+                closable
+                @close="handleClose(index,scope.row)">
+                  {{item}}
+                </el-tag>
+                <!-- 输入的文本框 -->
+                <el-input
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
@@ -61,7 +86,32 @@
           <!-- 静态属性表格 -->
           <el-table :data="onlyTableData" border stripe>
             <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- 循环渲染tag标签 -->
+                <el-tag 
+                class="attr-tags"
+                v-for="(item,index) in scope.row.attr_vals" 
+                :key="index"
+                closable
+                @close="handleClose(index,scope.row)">
+                  {{item}}
+                </el-tag>
+                <!-- 输入的文本框 -->
+                <el-input
+                  class="input-new-tag"
+                  v-if="scope.row.inputVisible"
+                  v-model="scope.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
@@ -160,7 +210,7 @@
             {required:true,message:`输入不能为空`,trigger:'blur'},
             {min:3,max:10,message:`输入的内容在3-10个字符之间`,trigger:'blur'}
           ]
-        },
+        },  
       }
     },
     computed:{
@@ -192,6 +242,13 @@
       handleChange(){
         // 当级联选择框的选中项发生变化时向服务器发起请求
         this.getParamsData()
+        if(this.selectedCateKeys.length !== 3){
+          // 如果所选中的分类不是三级分类，则清空级联选择框对应数组
+          this.selectedCateKeys = []
+          // 把动态参数和静态数据进行清空（138）
+          this.manyTableData = []
+          this.onlyTableData = []
+        }
       },
       // 发起获取参数的列表数据的请求
       async getParamsData(){
@@ -200,6 +257,17 @@
         const {data} = await this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:this.activeName}})
         if(data.meta.status !== 200) return this.$message.error('获取参数列表失败！')
         console.log(data);
+        // 在赋值之前，把data.data里的attr_vals都循环一次
+        data.data.forEach(item => {
+          // 由于该属性是以空格为分隔符的字符串形式，所以使用.split方法将其转为数组的形式，再次赋值给它自身
+          // 还需判断该属性是否为空，如果为空，则返回一个空数组
+          item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+          // 控制文本框的显示与隐藏
+          item.inputVisible = false
+          // 文本框中输入的值，默认为空
+          item.inputValue = ''
+        });
+        console.log(data.data);
         // 判断所选择的页签面板是动态的还是静态的，根据所选择的面板向各自的数据列表里面赋值
         if(this.activeName === 'many'){
           this.manyTableData = data.data
@@ -270,6 +338,46 @@
         if(data.meta.status !== 200) return this.$message.error('删除失败！')
         this.$message.success('删除成功！')
         this.getParamsData()
+      },
+      // 文本框失去焦点或按下enter键都会触发
+      handleInputConfirm(row){
+        // 对输入的空格做处理
+        if(row.inputValue.trim().length === 0){
+          row.inputValue = ''
+          row.inputVisible = false
+          return
+        }
+        // 如果没有return，则证明用户输入了内容，需要做后续处理
+        row.attr_vals.push(row.inputValue.trim())
+        // 重置输入框中的值为空
+        row.inputValue = ''
+        // 隐藏输入框
+        row.inputVisible = false
+        // 调用保存修改参数项的函数
+        this.saveAttrVals(row)
+      },
+      // 将attr_vals的数据持久化保存
+      async saveAttrVals(row){
+        // 需要发起请求，保存此次操作
+        const {data} = await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`,{
+          // 使用join函数把数组形式的attr_vals用空格拼接成字符串
+          attr_name:row.attr_name,attr_sel:row.attr_sel,attr_vals:row.attr_vals.join(' ')
+        })
+        if(data.meta.status !== 200) return this.$message.error('添加参数失败！')
+      },
+      // 点击按钮展示文本输入框
+      showInput(row){
+        row.inputVisible = true
+        // 让文本框自动获得焦点
+         this.$nextTick(()=> {
+          this.$refs.saveTagInput.$refs.input.focus();
+        });
+      },
+      // 删除参数项
+      handleClose(id,row){
+        row.attr_vals.splice(id,1)
+        // 调用保存修改参数项的函数
+        this.saveAttrVals(row)
       }
     }
   }
@@ -279,5 +387,11 @@
   .cat_opt{
     margin-bottom: 15px;
     margin-top: 15px;
+  }
+  .input-new-tag{
+    width: 120px;
+  }
+  .attr-tags{
+    margin: 0 10px;
   }
 </style>
