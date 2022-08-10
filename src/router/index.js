@@ -7,6 +7,7 @@ import UserPage from '@/components/user/UserPage'
 import rightsPage from '@/components/power/rightsPage'
 import rolesPage from '@/components/power/rolesPage'
 import CatePage from '@/components/goods/CatePage'
+import goodsPage from '@/components/goods/goodsPage'
 import paramsPage from '@/components/goods/paramsPage'
 Vue.use(Router)
 
@@ -56,6 +57,11 @@ const router = new Router({
           path:'/params',
           // name:UserPage,
           component:paramsPage
+        },
+        {
+          path:'/goods',
+          // name:UserPage,
+          component:goodsPage
         },
       ]
     }
