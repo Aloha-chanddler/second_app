@@ -9,6 +9,7 @@ import rolesPage from '@/components/power/rolesPage'
 import CatePage from '@/components/goods/CatePage'
 import goodsPage from '@/components/goods/goodsPage'
 import paramsPage from '@/components/goods/paramsPage'
+import addPage from '@/components/goods/addPage'
 Vue.use(Router)
 
 const router = new Router({
@@ -62,6 +63,11 @@ const router = new Router({
           path:'/goods',
           // name:UserPage,
           component:goodsPage
+        },
+        {
+          path:'/goods/add',
+          // name:UserPage,
+          component:addPage
         },
       ]
     }

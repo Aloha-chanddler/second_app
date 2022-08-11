@@ -19,6 +19,18 @@ Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
 
+// 注册全局的过滤器，第一个参数为过滤器的名称，第二个参数为过滤器的处理函数
+Vue.filter('dateFormat',function(originVal){
+  const dt =  new Date(originVal)
+  const y =  dt.getFullYear()
+  const m = (dt.getMonth() + 1 +'').padStart(2,'0')
+  const d = (dt.getDate() + '').padStart(2,'0')
+  const hh = (dt.getHours() + '').padStart(2,'0')
+  const mm = (dt.getMinutes() + '').padStart(2,'0')
+  const ss = (dt.getSeconds() + '').padStart(2,'0')
+  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`
+})
+
 // 全局注册 vue-table-with-tree-grid
 Vue.component('tree-table',TreeTable)
 
