@@ -10,6 +10,7 @@ import CatePage from '@/components/goods/CatePage'
 import goodsPage from '@/components/goods/goodsPage'
 import paramsPage from '@/components/goods/paramsPage'
 import addPage from '@/components/goods/addPage'
+import orderPage from '@/components/order/orderPage'
 Vue.use(Router)
 
 const router = new Router({
@@ -68,6 +69,11 @@ const router = new Router({
           path:'/goods/add',
           // name:UserPage,
           component:addPage
+        },
+        {
+          path:'/orders',
+          // name:UserPage,
+          component:orderPage
         },
       ]
     }
