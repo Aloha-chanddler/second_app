@@ -71,19 +71,35 @@
               :on-remove="handleRemove"
               list-type="picture"
               :headers="headerObj"
-              :on-success="handleSuccess">
+              :on-success="handleSuccess"
+              >
               <el-button size="small" type="primary">点击上传</el-button>
               <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品内容" name="4">
+            <!-- 富文本编辑器组件 -->
+            <quill-editor
+              v-model="addForm.goods_introduce"
+            />
+            <el-button @click="addGoods" class="btnAdd" type="primary">添加商品</el-button>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
+    <!-- 图片预览对话框 -->
+    <el-dialog
+      title="图片预览"
+      :visible.sync="previewVisible"
+      width="70%">
+      <img :src="previewPath" alt="" class="previewImg">
+    </el-dialog>
   </div>
 </template>
 
 <script>
+// 导入lodash
+  import _ from 'lodash'
   export default {
     data(){
       return {
@@ -100,7 +116,10 @@
           // 商品所属的分类数组
           goods_cat:[],
           // 上传图片的临时路径
-          pics:[]
+          pics:[],
+          // 商品介绍内容
+          goods_introduce:'',
+          attrs:[]
         },
         // 添加商品的表单验证对象
         addFormRules:{
@@ -138,7 +157,11 @@
         // 图片上传组件的headers请求头对象
         headerObj:{
           Authorization:window.sessionStorage.getItem('token')
-        }
+        },
+        // 预览图片的地址
+        previewPath:'',
+        // 显示与隐藏图片预览对话框，默认为false
+        previewVisible:false
       }
     },
     created(){
@@ -200,8 +223,10 @@
         }
       },
       // 处理图片预览效果
-      handlePreview(){
-
+      handlePreview(file){
+        // console.log(file);
+        this.previewPath = file.response.data.url
+        this.previewVisible = true
       },
       // 处理移除图片的操作
       handleRemove(file){
@@ -224,6 +249,41 @@
         // 将图片上传成功时返回的临时路径对象保存到data中addForm里的pics属性上
         this.addForm.pics.push(picInfo)
         console.log(this.addForm);
+      },
+      // 点击按钮发送添加商品的请求
+      addGoods(){
+        this.$refs.addFormRef.validate(async valid=>{
+          if(!valid) return this.$message.error('请填写必要的表单项！')
+          // 执行添加的业务逻辑
+          // 先使用lodash对addForm做一下深拷贝
+          const form = _.cloneDeep(this.addForm)
+          // 对form下的goods_cat使用','拼接为一个数组，以便之后请求的时候携带
+          form.goods_cat = form.goods_cat.join(',')
+          // 处理动态参数
+          this.manyTableData.forEach(item=>{
+            // newInfo将来需要push到attrs中作为参数发起添加商品请求
+            const newInfo = {
+              attr_id:item.attr_id,attr_value:item.attr_vals
+            }
+            this.addForm.attrs.push(newInfo)
+          })
+          // 处理静态属性
+          this.onlyTableData.forEach(item=>{
+            const newInfo = {
+              attr_id:item.attr_id,attr_value:item.attr_vals
+            }
+            this.addForm.attrs.push(newInfo)
+          })
+          // 将data中的addForm里的attrs复制给深拷贝出来的form里的attrs
+          form.attrs = this.addForm.attrs
+          // 向服务器发起添加商品的请求
+          const {data} = await this.$http.post(`goods`,form)
+          if(data.meta.status !== 201) return this.$message.error('添加商品失败！')
+          this.$message.success('添加商品成功！')
+          // 通过编程式导航跳转到商品列表页面
+          this.$router.push('/goods')
+          console.log(form);
+        })
       }
     }
   }
@@ -232,5 +292,11 @@
 <style lang="less" scoped>
  .el-checkbox{
   margin: 0 5px 0 0 !important;
+ }
+ .previewImg{
+  width: 100%;
+ }
+ .btnAdd{
+  margin-top: 15px;
  }
 </style>
