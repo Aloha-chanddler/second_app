@@ -11,6 +11,7 @@ import goodsPage from '@/components/goods/goodsPage'
 import paramsPage from '@/components/goods/paramsPage'
 import addPage from '@/components/goods/addPage'
 import orderPage from '@/components/order/orderPage'
+import reportPage from '@/components/report/reportPage'
 Vue.use(Router)
 
 const router = new Router({
@@ -42,38 +43,35 @@ const router = new Router({
         },
         {
           path:'/rights',
-          // name:UserPage,
           component:rightsPage
         },
         {
           path:'/roles',
-          // name:UserPage,
           component:rolesPage
         },
         {
           path:'/categories',
-          // name:UserPage,
           component:CatePage
         },
         {
           path:'/params',
-          // name:UserPage,
           component:paramsPage
         },
         {
           path:'/goods',
-          // name:UserPage,
           component:goodsPage
         },
         {
           path:'/goods/add',
-          // name:UserPage,
           component:addPage
         },
         {
           path:'/orders',
-          // name:UserPage,
           component:orderPage
+        },
+        {
+          path:'/reports',
+          component:reportPage
         },
       ]
     }
